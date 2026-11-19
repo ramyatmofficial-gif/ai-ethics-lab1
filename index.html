@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Ethics Lab – Grade 9 AI (417)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ee; --card:#fff; --ink:#1b1f2a; --muted:#5d6475; --line:#e3dfd6;
+  --navy:#1f2a44;
+  --hr:#e4572e; --hr-soft:#fde8e1;
+  --bias:#d98e04; --bias-soft:#fdf1d6;
+  --priv:#127e8a; --priv-soft:#dcf2f4;
+  --inc:#6a4cc2; --inc-soft:#ece7fb;
+  --ok:#1e8a4c; --ok-soft:#ddf3e6; --bad:#c0392b; --bad-soft:#fbe3e0;
+  --r:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif}
+h1,h2,h3,h4{font-family:"Space Grotesk",Inter,sans-serif;line-height:1.2;margin:0 0 .5em}
+button{font:inherit;cursor:pointer}
+header{background:var(--navy);color:#fff;padding:18px 24px 0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;max-width:1100px;margin:0 auto}
+.brand small{display:block;opacity:.7;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+.brand h1{font-size:26px;margin:2px 0 0}
+.xp{background:rgba(255,255,255,.1);border-radius:999px;padding:8px 16px;font-weight:600;display:flex;gap:14px;align-items:center}
+.xp b{color:#ffd166}
+nav{max-width:1100px;margin:16px auto 0;display:flex;gap:4px;overflow-x:auto}
+nav a{color:#cfd6e6;text-decoration:none;padding:10px 14px;border-radius:12px 12px 0 0;font-weight:600;font-size:14px;white-space:nowrap;display:flex;gap:6px;align-items:center}
+nav a.on{background:var(--bg);color:var(--ink)}
+nav a .tick{color:#7ee2a8;font-size:12px}
+nav a.on .tick{color:var(--ok)}
+main{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+section{display:none}
+section.on{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+.lead{color:var(--muted);max-width:760px;margin:-4px 0 22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.btn{border:0;border-radius:12px;padding:11px 18px;font-weight:600;background:var(--navy);color:#fff}
+.btn:hover{filter:brightness(1.15)}
+.btn.ghost{background:transparent;color:var(--navy);border:2px solid var(--navy)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.fb{margin-top:14px;padding:14px 16px;border-radius:12px;display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-soft);border-left:5px solid var(--ok)}
+.fb.bad{background:var(--bad-soft);border-left:5px solid var(--bad)}
+.fb.info{background:#eef1f8;border-left:5px solid var(--navy)}
+
+/* home hero */
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;align-items:stretch}
+@media(max-width:800px){.hero{grid-template-columns:1fr}}
+.path{display:grid;gap:10px}
+.step{display:flex;gap:14px;align-items:center;padding:14px 16px;border-radius:14px;background:var(--card);border:1px solid var(--line);text-decoration:none;color:inherit;transition:.15s}
+.step:hover{transform:translateX(4px);border-color:var(--navy)}
+.step .n{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-weight:700;color:#fff;background:var(--navy);flex:none}
+.step.done .n{background:var(--ok)}
+.step h4{margin:0;font-size:16px}.step p{margin:0;font-size:13px;color:var(--muted)}
+
+/* compare table */
+table.cmp{width:100%;border-collapse:collapse;font-size:15px}
+table.cmp th,table.cmp td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.cmp th{font-family:"Space Grotesk";font-size:15px}
+table.cmp td:first-child{font-weight:600;color:var(--muted);width:120px}
+.cmp .e{background:#eef1f8}.cmp .m{background:#fff5e6}
+
+/* sort game */
+.sortwrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.bin{min-height:120px;border:2px dashed var(--line);border-radius:14px;padding:12px}
+.bin h4{font-size:15px;margin-bottom:8px}
+.bin.e{background:#f3f5fb}.bin.m{background:#fff9ef}
+.stmt{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-weight:600;font-size:17px;text-align:center;margin:14px 0}
+.chip{display:block;font-size:13px;padding:6px 10px;border-radius:8px;margin:4px 0;background:#fff;border:1px solid var(--line)}
+.chip.ok{border-color:var(--ok)}.chip.bad{border-color:var(--bad);text-decoration:line-through;opacity:.7}
+
+/* principles */
+.pcard{border-radius:var(--r);padding:20px;cursor:pointer;border:2px solid transparent;transition:.15s;position:relative}
+.pcard:hover{transform:translateY(-3px)}
+.pcard.sel{border-color:currentColor}
+.pcard .ic{font-size:30px}
+.pcard h3{margin:8px 0 4px}
+.pcard p{margin:0;font-size:14px;color:var(--ink)}
+.p-hr{background:var(--hr-soft);color:var(--hr)}.p-bias{background:var(--bias-soft);color:var(--bias)}
+.p-priv{background:var(--priv-soft);color:var(--priv)}.p-inc{background:var(--inc-soft);color:var(--inc)}
+.pdetail{margin-top:18px}
+.checkq{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.checkq:last-child{border:0}
+.checkq .q{flex:1;font-weight:600}
+.ex{padding:12px 14px;border-radius:12px;margin-top:10px;font-size:15px}
+
+/* bias sim */
+.sim{display:grid;grid-template-columns:1fr 1.2fr;gap:20px}
+@media(max-width:800px){.sim{grid-template-columns:1fr}}
+input[type=range]{width:100%;accent-color:var(--bias)}
+.people{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin:10px 0}
+.person{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-size:20px;background:#eee;border:2px solid transparent;transition:.25s}
+.person.A{background:#dbe7ff}.person.B{background:#ffe1ec}
+.person.pick{border-color:var(--ok);box-shadow:0 0 0 3px var(--ok-soft)}
+.person.drop{opacity:.35}
+.bar{height:26px;border-radius:8px;background:#eee;overflow:hidden;display:flex;margin:4px 0 10px}
+.bar div{height:100%;transition:width .3s;display:flex;align-items:center;padding-left:8px;font-size:12px;font-weight:700;color:#1b1f2a;white-space:nowrap}
+.meter{font-size:22px;font-weight:700;font-family:"Space Grotesk"}
+
+/* scenarios */
+.scen-list{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.scen-list button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;font-weight:600;font-size:14px}
+.scen-list button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.scen-list button.done::after{content:" ✓";color:var(--ok)}
+.scen-list button.on.done::after{color:#7ee2a8}
+.story{display:flex;gap:16px;align-items:flex-start}
+.story .emoji{font-size:46px;line-height:1}
+.story h3{margin-bottom:6px}
+.story p{margin:0}
+.stage{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+.stage h4{display:flex;gap:10px;align-items:center}
+.stage h4 .n{width:26px;height:26px;border-radius:8px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:14px}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;border:2px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;font-weight:500}
+.opt:hover{border-color:#9aa3b8}
+.opt:disabled,.ptog:disabled{color:var(--ink);cursor:default}
+.ptog.sel:disabled{color:#fff}
+.opt.sel{border-color:var(--navy);background:#eef1f8}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.ptoggles{display:flex;gap:8px;flex-wrap:wrap}
+.ptog{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;font-weight:700}
+.ptog.sel.hr{background:var(--hr);border-color:var(--hr);color:#fff}
+.ptog.sel.bias{background:var(--bias);border-color:var(--bias);color:#fff}
+.ptog.sel.priv{background:var(--priv);border-color:var(--priv);color:#fff}
+.ptog.sel.inc{background:var(--inc);border-color:var(--inc);color:#fff}
+textarea{width:100%;min-height:90px;border:2px solid var(--line);border-radius:12px;padding:12px;font:inherit;resize:vertical}
+textarea:focus,input[type=text]:focus{outline:none;border-color:var(--navy)}
+.hidden{display:none}
+
+/* my ai audit */
+input[type=text]{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px;font:inherit}
+.audit-q{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.yn{display:flex;gap:6px;flex:none}
+.yn button{border:2px solid var(--line);background:#fff;border-radius:10px;padding:6px 14px;font-weight:700}
+.yn button.sel.good{background:var(--ok);border-color:var(--ok);color:#fff}
+.yn button.sel.risk{background:var(--bad);border-color:var(--bad);color:#fff}
+.gauge{height:18px;border-radius:999px;background:#eee;overflow:hidden;margin:8px 0}
+.gauge div{height:100%;transition:width .4s}
+
+/* quiz */
+.qprog{height:8px;background:#e6e2d8;border-radius:999px;overflow:hidden;margin-bottom:18px}
+.qprog div{height:100%;background:var(--navy);transition:width .3s}
+.big{font-size:20px;font-weight:600;margin-bottom:14px}
+.report{white-space:pre-wrap;background:#f7f7f4;border:1px solid var(--line);border-radius:12px;padding:16px;font-size:14px}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:600;font-size:14px;margin:4px}
+.badge.locked{opacity:.35}
+/* champion badge */
+.modal{position:fixed;inset:0;background:rgba(15,20,35,.72);display:none;place-items:center;z-index:90;padding:20px;overflow:auto}
+.modal.show{display:grid;animation:fade .3s}
+.mbox{background:#fff;border-radius:22px;padding:26px;max-width:520px;width:100%;text-align:center;position:relative}
+.mbox h2{font-size:26px;margin:4px 0}
+.mbox .x{position:absolute;top:12px;right:14px;border:0;background:none;font-size:22px;color:var(--muted)}
+.medal{width:100%;max-width:360px;margin:6px auto;display:block;filter:drop-shadow(0 12px 22px rgba(0,0,0,.18))}
+.medal.pop{animation:pop .9s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(.2) rotate(-25deg);opacity:0}100%{transform:none;opacity:1}}
+.champ{display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:center;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+@media(max-width:700px){.champ{grid-template-columns:1fr;text-align:center}}
+.champ.locked .medal{filter:grayscale(1) opacity(.35)}
+.confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:95;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.foot{color:var(--muted);font-size:13px;text-align:center;margin-top:30px}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="brand"><small>Sharjah Indian School, Juwaiza · Grade 9 AI (417)</small><h1>AI Ethics Lab</h1></div>
+    <div class="xp">⭐ XP <b id="xp">0</b><span style="opacity:.5">|</span>🏅 <b id="badgeCount">0</b>/6</div>
+  </div>
+  <nav id="nav"></nav>
+</header>
+
+<main>
+<!-- HOME -->
+<section id="home">
+  <div class="hero">
+    <div class="card" style="background:var(--navy);color:#fff;border:0">
+      <span class="pill" style="background:#ffd166;color:#1f2a44">Mission brief</span>
+      <h2 style="font-size:30px;margin-top:14px">AI is making decisions about people. Who checks if it's fair?</h2>
+      <p style="opacity:.85">AI decides who gets a job interview, which face a camera recognises and whose voice an assistant understands. In this lab you'll learn the rules AI should follow. Then you'll act as an <b>AI Ethics Inspector</b>: you'll check real-life AI systems, find the problems and suggest fixes.</p>
+      <p style="opacity:.85">Complete each mission to earn XP and badges. At the end you'll get a learning report to share with your teacher.</p>
+      <a class="btn" href="#learn" style="background:#ffd166;color:#1f2a44;text-decoration:none;display:inline-block;margin-top:6px">Start Mission 1 →</a>
+    </div>
+    <div class="path" id="path"></div>
+  </div>
+</section>
+
+<!-- 1 ETHICS VS MORALS -->
+<section id="learn">
+  <h2>Mission 1 · Ethics vs Morals</h2>
+  <p class="lead">Before we judge AI, we need to know what "right" and "wrong" mean. People use two words for this: <b>ethics</b> and <b>morals</b>.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>Compare them</h3>
+      <table class="cmp">
+        <tr><th></th><th class="e">Ethics</th><th class="m">Morals</th></tr>
+        <tr><td>Definition</td><td class="e">Rules from society or a profession</td><td class="m">Personal beliefs of right and wrong</td></tr>
+        <tr><td>Source</td><td class="e">External (outside you)</td><td class="m">Internal (inside you)</td></tr>
+        <tr><td>Example</td><td class="e">Legal ethics, medical ethics</td><td class="m">Religious teachings, personal values (honesty, respect, kindness)</td></tr>
+        <tr><td>Focus</td><td class="e">Society's standards</td><td class="m">Your conscience: your own sense of right and wrong</td></tr>
+        <tr><td>Flexibility</td><td class="e">More universal and consistent</td><td class="m">Varies from person to person</td></tr>
+      </table>
+      <div class="ex" style="background:#f3f5fb;margin-top:14px">💡 <b>Memory trick:</b> <b>E</b>thics comes from <b>E</b>xternal rules. <b>M</b>orals come from <b>M</b>e.<br>
+      <span style="color:var(--muted);font-size:14px">Ethics <i>asks</i>: "Is it good to speak the truth in all situations?" · Morals <i>says</i>: "I always speak the truth."</span></div>
+    </div>
+    <div class="card">
+      <h3>Sort it! Ethics or Morals?</h3>
+      <p style="color:var(--muted);margin:0">Read each statement. Is it a rule from society or a profession, or a person's own belief?</p>
+      <div id="sortArea"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 PRINCIPLES -->
+<section id="principles">
+  <h2>Mission 2 · The 4 AI Ethics Principles</h2>
+  <p class="lead">Every AI system should pass four checks. Tap each principle to open its <b>inspector checklist</b>. Then decide whether each example passes or fails.</p>
+  <div class="grid4" id="pcards"></div>
+  <div class="card pdetail" id="pdetail"></div>
+</section>
+
+<!-- 3 BIAS SIM -->
+<section id="bias-lab">
+  <h2>Mission 3 · Bias Simulator: Where Does Bias Come From?</h2>
+  <p class="lead">A company builds an AI to shortlist job applicants. The AI learns by studying who the company hired <b>in the past</b>. Move the slider to change the past hiring data. Then watch what the AI does with 20 <b>equally skilled</b> new applicants.</p>
+  <div class="sim">
+    <div class="card">
+      <h3>🗂️ Training data: past hires</h3>
+      <p style="margin:0 0 6px;color:var(--muted);font-size:14px">Share of past hires from each group</p>
+      <input type="range" id="biasSlider" min="0" max="100" value="80">
+      <div class="bar"><div id="barA" style="background:#a9c4ff"></div><div id="barB" style="background:#ffb3cc"></div></div>
+      <div class="row" style="justify-content:space-between;font-size:14px"><span>🔵 Group A: <b id="pa"></b></span><span>🩷 Group B: <b id="pb"></b></span></div>
+      <div class="fb info show" id="simMsg" style="margin-top:16px"></div>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px">Real case: an online retailer stopped using an AI hiring tool after finding it marked down CVs from women. It had learned from 10 years of CVs that came mostly from men.</p>
+    </div>
+    <div class="card">
+      <h3>🤖 AI shortlists 10 of 20 new applicants</h3>
+      <p style="margin:0;color:var(--muted);font-size:14px">Every applicant has the same marks and skills. Only the group is different.</p>
+      <div class="people" id="people"></div>
+      <div class="row" style="justify-content:space-between">
+        <div>Group A selected: <span class="meter" id="selA"></span>/10</div>
+        <div>Group B selected: <span class="meter" id="selB"></span>/10</div>
+      </div>
+      <div style="margin-top:8px">Fairness score</div>
+      <div class="gauge"><div id="fairBar"></div></div>
+      <div class="stage">
+        <h4><span class="n">?</span>Think it through</h4>
+        <p style="margin-top:0" id="simQ">Set the slider so the AI treats both groups fairly. What did you have to change: the AI, or the <b>data</b>?</p>
+        <div class="opts" id="simOpts"></div>
+        <div class="fb" id="simFb"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 SCENARIOS -->
+<section id="scenarios">
+  <h2>Mission 4 · AI Ethics Inspector: Real-World Cases</h2>
+  <p class="lead">Each case is based on things that really happen. Inspect each one in 4 steps: <b>Identify → Analyse → Fix → Interpret</b>.</p>
+  <div class="scen-list" id="scenList"></div>
+  <div class="card" id="scenCard"></div>
+</section>
+
+<!-- 5 MY AI -->
+<section id="my-ai">
+  <h2>Mission 5 · Audit Your Own AI Idea</h2>
+  <p class="lead">Now you're the AI designer. Think of an AI you'd like to build, for example a school canteen recommender, a homework helper, or a smart traffic light for Sharjah. Run it through the full ethics checklist.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>1 · Describe your AI</h3>
+      <input type="text" id="aiName" placeholder="e.g. An AI that picks the school football team from match videos">
+      <div class="row" style="margin-top:10px;font-size:14px;color:var(--muted)">Need an idea?
+        <button class="btn ghost" style="padding:6px 10px;font-size:13px" data-idea="An AI camera that marks student attendance using face recognition">Attendance camera</button>
+        <button class="btn ghost" style="padding:6px 10px;font-size:13px" data-idea="An AI that recommends which students get a scholarship">Scholarship picker</button>
+        <button class="btn ghost" style="padding:6px 10px;font-size:13px" data-idea="An Arabic + English voice assistant for the school library">Library voice assistant</button>
+      </div>
+      <h3 style="margin-top:22px">2 · Answer honestly</h3>
+      <div id="auditQs"></div>
+    </div>
+    <div class="card">
+      <h3>3 · Ethics report</h3>
+      <div id="auditOut"><p style="color:var(--muted)">Answer the questions to see your AI's ethics score.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 QUIZ -->
+<section id="quiz">
+  <h2>Mission 6 · Final Check</h2>
+  <p class="lead">10 questions. Use what you learned in the lab.</p>
+  <div class="card" id="quizCard"></div>
+</section>
+
+<!-- REPORT -->
+<section id="report">
+  <h2>🏆 My Learning Report</h2>
+  <p class="lead">Your badges and inspector notes. Copy the report and submit it to your teacher.</p>
+  <div class="card">
+    <div id="champArea"></div>
+    <h3>Mission badges</h3>
+    <div id="badges"></div>
+    <div class="row" style="margin:18px 0 10px">
+      <input type="text" id="stuName" placeholder="Your name, grade and section (e.g. Arjun · 9C)" style="max-width:380px">
+      <button class="btn" id="copyRep">📋 Copy report</button>
+      <button class="btn ghost" id="resetAll">Start again</button>
+    </div>
+    <div class="report" id="repText"></div>
+  </div>
+</section>
+<div class="modal" id="champModal"><div class="mbox">
+  <button class="x" onclick="closeChamp()" aria-label="Close">✕</button>
+  <span class="pill" style="background:#ffd166;color:#1f2a44">Class complete!</span>
+  <h2>You're an AI Ethics Champion! 🎉</h2>
+  <p style="color:var(--muted);margin:4px 0 8px">You finished all 6 missions. Type your name to put it on your badge.</p>
+  <div id="modalMedal"></div>
+  <input type="text" id="champName" placeholder="Your name · Grade & section (e.g. Arjun · 9C)" style="margin:6px 0 12px">
+  <div class="row" style="justify-content:center">
+    <button class="btn dlBtn" onclick="downloadBadge()">⬇️ Download badge picture</button>
+    <a class="btn ghost" href="#report" onclick="closeChamp()" style="text-decoration:none">See my report</a>
+  </div>
+  <p class="noDl" style="font-size:13px;color:var(--muted);margin:10px 0 0">Tip: take a screenshot to keep your badge.</p>
+</div></div>
+<p class="foot">AI Ethics · Grade 9 Artificial Intelligence (Subject Code 417) · Sharjah Indian School, Juwaiza</p>
+</main>
+
+<script>
+/* ---------- state ---------- */
+const P = {
+  hr:{name:"Human Rights",ic:"✊",cls:"p-hr",tog:"hr",color:"var(--hr)",soft:"var(--hr-soft)",
+      def:"When we build AI solutions, we must make sure they follow human rights.",
+      qs:["Does your AI take away freedom?","Does your AI discriminate against people?","Does your AI take away people's jobs?"],
+      ex:[{t:"A city uses AI cameras to track everyone who goes to a peaceful public meeting and adds them to a watch-list.",pass:false,why:"It takes away freedom of movement and freedom to gather."},
+          {t:"A factory uses AI robots for dangerous chemical work and retrains workers to supervise and repair the robots.",pass:true,why:"Workers stay safe and keep their jobs in a new role."}]},
+  bias:{name:"Bias",ic:"⚖️",cls:"p-bias",tog:"bias",color:"var(--bias)",soft:"var(--bias-soft)",
+      def:"Bias means unfairly preferring one thing over another. In AI, bias usually comes from the training data. If the training data is biased, the AI's results will be biased too.",
+      qs:["Does your data equally represent all the groups of people it is about?","Will your AI learn to discriminate against certain groups of people?"],
+      ex:[{t:"A skin-check app was trained on 95% photos of light skin. It often misses problems on darker skin.",pass:false,why:"The data doesn't represent all groups, so the AI is less accurate for some people."},
+          {t:"A handwriting reader is trained on samples from students of many schools, ages and languages.",pass:true,why:"Diverse, balanced data reduces bias."}]},
+  priv:{name:"Privacy",ic:"🔒",cls:"p-priv",tog:"priv",color:"var(--priv)",soft:"var(--priv-soft)",
+      def:"We need rules that keep each person's private data safe.",
+      qs:["Does your AI collect personal data from people?","What does it do with the data?"],
+      ex:[{t:"A free game app secretly records your location and sells it to advertisers.",pass:false,why:"It collects personal data without permission and misuses it."},
+          {t:"A fitness app asks permission, keeps data on your phone, and lets you delete it anytime.",pass:true,why:"The user has consent and control, and the data stays protected."}]},
+  inc:{name:"Inclusion",ic:"🤝",cls:"p-inc",tog:"inc",color:"var(--inc)",soft:"var(--inc-soft)",
+      def:"AI must not discriminate against any group of people or put them at any kind of disadvantage.",
+      qs:["Does your AI leave out any person or group?","Do rich people and poor people benefit equally from your AI?","How easy is your AI to use?"],
+      ex:[{t:"A government help-desk AI works only through an expensive app and only in English.",pass:false,why:"It leaves out people without smartphones and people who speak Arabic, Urdu, Malayalam and other languages."},
+          {t:"A bus-route AI works by SMS, by voice and in an app, in 5 languages, with large-text mode.",pass:true,why:"Anyone can use it, whatever their phone, language or eyesight."}]}
+};
+
+const SCEN = [
+ {id:"s1",emoji:"📷",title:"The Attendance Camera",place:"A school",
+  text:"A school installs face-recognition cameras at the gate to mark attendance automatically. The company stores every student's face photo on its own servers. It also uses the photos to train other products it sells, without asking parents.",
+  ans:["priv"], qText:"Which checklist question exposes the main problem?",
+  q:[{t:"What does the AI do with the data it collects?",ok:true},{t:"Does the AI take away people's jobs?",ok:false},{t:"Is the AI easy to use?",ok:false},{t:"Do rich and poor benefit equally?",ok:false}],
+  fix:[{t:"Get parents' consent, store data securely on the school's own system, delete it at the end of the year, and never reuse it for other products.",ok:true,why:"This deals with consent, storage and how the data is used. Those are the core privacy questions."},
+       {t:"Use a higher-resolution camera so faces are recognised faster.",ok:false,why:"Faster recognition doesn't protect anyone's data. It may collect even more."},
+       {t:"Stop taking attendance completely.",ok:false,why:"That's too extreme. Attendance is a fair need. The problem is how the data is handled."}],
+  think:"Would you feel comfortable if your face photo was used to train a product you've never heard of? Who should decide?"},
+ {id:"s2",emoji:"💼",title:"The Hiring Robot",place:"A large company",
+  text:"A company trains an AI on its last 10 years of hiring. Most past hires were men. The AI starts giving lower scores to CVs that mention 'girls' school' or 'women's chess club'.",
+  ans:["bias","hr"], qText:"Which checklist question exposes the main problem?",
+  q:[{t:"Does the training data equally represent all groups of people?",ok:true},{t:"Does the AI collect personal data?",ok:false},{t:"How easy is the AI to use?",ok:false},{t:"Does the AI take away freedom?",ok:false}],
+  fix:[{t:"Retrain the AI on balanced data, remove gender clues from CVs, and have humans review its decisions regularly.",ok:true,why:"This fixes the cause (biased data) and adds human checks."},
+       {t:"Hire more men so the data stays consistent.",ok:false,why:"That makes the bias stronger. The AI would copy the unfairness forever."},
+       {t:"Make the AI work faster so more CVs get processed.",ok:false,why:"Speed doesn't fix unfairness. It just makes unfair decisions faster."}],
+  think:"The programmers never wrote 'reject women' in the code. So who is responsible for the bias: the programmers, the data, or the company?"},
+ {id:"s3",emoji:"🎙️",title:"The Assistant That Can't Hear You",place:"Homes across the UAE",
+  text:"A popular voice assistant understands American and British English very well. It often fails with Indian, Arabic or Filipino accents, and it doesn't support Arabic, Hindi, Malayalam or Tagalog at all. Many families in Sharjah can't use it properly.",
+  ans:["inc","bias"], qText:"Which checklist question exposes the main problem?",
+  q:[{t:"Does the AI leave out any person or group?",ok:true},{t:"Does the AI take away people's jobs?",ok:false},{t:"What does it do with the data?",ok:false},{t:"Does it take away freedom?",ok:false}],
+  fix:[{t:"Collect voice samples from many accents and add the languages people in the region actually speak.",ok:true,why:"More diverse training data and language support means more people can use it."},
+       {t:"Tell users to practise an American accent.",ok:false,why:"That asks people to change to suit the AI. Inclusion means the AI should work for people."},
+       {t:"Sell it only in the USA and UK.",ok:false,why:"That doesn't fix the problem. It just leaves people out on purpose."}],
+  think:"Think of the people in your family or building. Who would struggle to use this assistant? Why does that matter?"},
+ {id:"s4",emoji:"🏦",title:"The Loan Decider",place:"A bank",
+  text:"A bank uses AI to approve loans. The AI learned that people from expensive neighbourhoods usually repay, so it automatically rejects most applicants from lower-income areas, even those with good jobs and savings.",
+  ans:["inc","bias"], qText:"Which checklist question exposes the main problem?",
+  q:[{t:"Do rich people and poor people benefit equally from this AI?",ok:true},{t:"Is the AI easy to use?",ok:false},{t:"Does it collect personal data?",ok:false},{t:"Does it take away people's jobs?",ok:false}],
+  fix:[{t:"Judge each person on their own income and repayment record, not their address. Let people ask a human to review a rejection.",ok:true,why:"The decision is based on the individual, not their group, and it can be appealed."},
+       {t:"Open more branches in rich areas.",ok:false,why:"That serves the advantaged group even more."},
+       {t:"Hide from customers that AI is making the decision.",ok:false,why:"Hiding it makes things worse. People have a right to know and to question decisions."}],
+  think:"If the AI keeps rejecting people from poorer areas, what happens to those families over 10 years? Does the AI make inequality bigger?"},
+ {id:"s5",emoji:"🛒",title:"The Overnight Self-Checkout",place:"A supermarket chain",
+  text:"A supermarket chain replaces all 2,000 cashiers with AI self-checkout machines in one week. There's no notice, no retraining and no new roles. The machines also flag shoppers as 'suspicious' based on how they look.",
+  ans:["hr","bias"], qText:"Which checklist question exposes the main problem?",
+  q:[{t:"Does the AI take away people's jobs?",ok:true},{t:"Does the data equally represent all groups?",ok:false},{t:"How easy is it to use?",ok:false},{t:"What does it do with the data?",ok:false}],
+  fix:[{t:"Bring in AI gradually, retrain cashiers as tech support and customer-help staff, and remove the appearance-based 'suspicious' flag.",ok:true,why:"This protects people's jobs and stops discrimination."},
+       {t:"Keep the machines, but give staff one month's pay.",ok:false,why:"That's better than nothing, but people still lose their jobs and the discrimination stays."},
+       {t:"Ban all AI in shops forever.",ok:false,why:"AI can help. The goal is to use it responsibly, not to avoid it completely."}],
+  think:"Is it always wrong for AI to replace a job? What should a company owe the workers whose jobs change?"},
+ {id:"s6",emoji:"🌆",title:"The All-Seeing Smart City",place:"A smart city",
+  text:"A city connects every street camera to an AI that tracks each citizen's movements all day. It keeps the data forever, and anyone it marks as 'unusual', such as people out late at night, is automatically reported.",
+  ans:["hr","priv"], qText:"Which checklist question exposes the main problem?",
+  q:[{t:"Does the AI take away freedom?",ok:true},{t:"Is the AI easy to use?",ok:false},{t:"Do rich and poor benefit equally?",ok:false},{t:"Does the AI take away people's jobs?",ok:false}],
+  fix:[{t:"Use cameras only for clear safety purposes like traffic and emergencies, blur faces by default, delete footage after a short time, and make humans check before anyone is reported.",ok:true,why:"This keeps the safety benefit while protecting freedom and privacy."},
+       {t:"Add even more cameras so the AI is more accurate.",ok:false,why:"More surveillance increases the problem."},
+       {t:"Let the AI decide punishments automatically to save time.",ok:false,why:"Removing humans from serious decisions about people's rights is dangerous."}],
+  think:"Where is the line between keeping people safe and watching people too much? Who should decide where that line is?"},
+ {id:"s7",emoji:"📝",title:"The Exam Marking AI",place:"An exam board",
+  text:"An exam board uses AI to mark essays. It was trained only on answers from a few top private schools. It gives lower marks to correct answers written in simpler English or a different style, even when the ideas are right.",
+  ans:["bias","inc"], qText:"Which checklist question exposes the main problem?",
+  q:[{t:"Will the AI learn to discriminate against certain groups?",ok:true},{t:"Does it take away people's jobs?",ok:false},{t:"Does it collect personal data?",ok:false},{t:"Does it take away freedom?",ok:false}],
+  fix:[{t:"Train it on answers from many kinds of schools, mark ideas rather than fancy vocabulary, and have teachers check a sample of every batch.",ok:true,why:"Diverse data plus human checks makes marking fairer."},
+       {t:"Teach every student to write like the top schools.",ok:false,why:"That asks students to fit the AI's bias instead of fixing it."},
+       {t:"Use the AI only for students who complain.",ok:false,why:"The AI would still be unfair to everyone else."}],
+  think:"Imagine your board exam was marked by this AI. How would you feel, and what would you want to ask the exam board?"},
+ {id:"s8",emoji:"📱",title:"The Free Photo Filter",place:"Your phone",
+  text:"A free photo-filter app goes viral among teenagers. To use it, you must allow access to your contacts, your exact location, your microphone and all your photos. Its privacy policy says it may 'share data with partners'.",
+  ans:["priv"], qText:"Which checklist question exposes the main problem?",
+  q:[{t:"Does the AI collect personal data from people?",ok:true},{t:"Do rich and poor benefit equally?",ok:false},{t:"Does it take away people's jobs?",ok:false},{t:"Does the data represent all groups?",ok:false}],
+  fix:[{t:"Ask only for the photo you're editing, explain clearly what is stored, and never share data without clear permission.",ok:true,why:"Collect only what's needed, be clear about it, and get consent. These are good privacy practices."},
+       {t:"Make the app cost money instead.",ok:false,why:"Paid apps can still misuse data. Price doesn't fix privacy."},
+       {t:"Add more filters so users don't mind.",ok:false,why:"Extra features don't make taking your data acceptable."}],
+  think:"Why does a photo filter need your contacts and microphone? What could 'partners' do with that data? Check one app on your own phone."}
+];
+
+const SORT = [
+ {t:"A doctor must keep patient records confidential.",a:"e",why:"Medical ethics: a rule set by the profession."},
+ {t:"I always tell the truth, even when it's hard.",a:"m",why:"A personal value the person chose."},
+ {t:"Lawyers must not share their clients' secrets.",a:"e",why:"Legal ethics: a professional rule."},
+ {t:"I believe it's wrong to waste food.",a:"m",why:"A personal belief from conscience."},
+ {t:"Journalists must check facts before publishing a story.",a:"e",why:"A rule of the journalism profession."},
+ {t:"I choose to be kind to everyone, even people I don't like.",a:"m",why:"Comes from the person's own conscience."},
+ {t:"Engineers must follow building safety codes.",a:"e",why:"An external rule set by society and the profession."},
+ {t:"Respecting my elders is important to me.",a:"m",why:"A personal value, often from family or religion."}
+];
+
+const QUIZ = [
+ {q:"Which statement best describes MORALS?",o:["Rules set by a profession","Personal beliefs about right and wrong","Laws passed by the government","Rules written into AI code"],a:1},
+ {q:"The source of ethics is…",o:["Internal","External","Random","Only religious"],a:1},
+ {q:"In AI, bias most often comes from…",o:["The computer's speed","The training data","The screen size","The programming language"],a:1},
+ {q:"An AI app asks for your contacts and location just to add a filter to a photo. Which principle is most at risk?",o:["Inclusion","Human Rights","Privacy","Bias"],a:2},
+ {q:"A voice assistant doesn't understand Arabic or Indian accents. This is mainly a problem of…",o:["Inclusion","Privacy","Morals","Speed"],a:0},
+ {q:"Which question checks for HUMAN RIGHTS?",o:["Does your AI take away freedom?","How easy is your AI to use?","What does it do with the data?","Is it built in Python?"],a:0},
+ {q:"\"Is a rich person and a poor person benefitted equally from your AI?\" belongs to which principle?",o:["Bias","Privacy","Inclusion","Human Rights"],a:2},
+ {q:"A hiring AI trained on mostly-male data rejects women. What is the BEST fix?",o:["Hire only men","Retrain it on balanced data and add human review","Make it run faster","Hide that AI is used"],a:1},
+ {q:"\"Lawyers must keep client information secret\" is an example of…",o:["Morals","Ethics","Bias","Inclusion"],a:1},
+ {q:"Which one is NOT one of the four AI ethics principles in this lesson?",o:["Privacy","Inclusion","Profit","Bias"],a:2}
+];
+
+const SECTIONS = [
+ {id:"home",label:"🏠 Home"},
+ {id:"learn",label:"1 Ethics vs Morals",title:"Ethics vs Morals",desc:"Learn the difference, then sort 8 statements",badge:"⚖️ Ethics Sorter"},
+ {id:"principles",label:"2 Principles",title:"The 4 Principles",desc:"Human Rights, Bias, Privacy, Inclusion",badge:"🧭 Principle Pro"},
+ {id:"bias-lab",label:"3 Bias Simulator",title:"Bias Simulator",desc:"See how biased data creates biased AI",badge:"🔬 Bias Buster"},
+ {id:"scenarios",label:"4 Real Cases",title:"Inspect Real Cases",desc:"Identify, analyse, fix and interpret 8 cases",badge:"🕵️ Ethics Inspector"},
+ {id:"my-ai",label:"5 Audit My AI",title:"Audit Your Own AI",desc:"Design an AI and run the checklist",badge:"🛠️ Responsible Designer"},
+ {id:"quiz",label:"6 Final Check",title:"Final Check",desc:"10-question quiz",badge:"🎓 AI Ethics Graduate"},
+ {id:"report",label:"🏆 Report"}
+];
+
+let S = {xp:0,done:{},sort:{},pex:{},sim:false,scen:{},audit:{},aiName:"",quiz:null,name:""};
+try{const s=JSON.parse(localStorage.getItem("aiEthicsLab")||"null"); if(s) S=Object.assign(S,s);}catch(e){}
+function save(){try{localStorage.setItem("aiEthicsLab",JSON.stringify(S))}catch(e){}}
+function addXP(n){S.xp+=n;save();renderTop();}
+function complete(id){if(!S.done[id]){S.done[id]=true;addXP(50);toast("Badge unlocked: "+SECTIONS.find(s=>s.id==id).badge);}
+ checkChampion(); renderTop();}
+
+/* ---------- class completion badge ---------- */
+const LEVELS={gold:{n:"GOLD",c1:"#f7d774",c2:"#c9971c",ring:"#8a6410"},silver:{n:"SILVER",c1:"#eef1f5",c2:"#a9b2bf",ring:"#69727f"},bronze:{n:"BRONZE",c1:"#f0b98a",c2:"#b8733a",ring:"#7a4a22"}};
+function allDone(){return SECTIONS.filter(s=>s.badge).every(s=>S.done[s.id]);}
+function levelFor(q){return q>=9?"gold":q>=7?"silver":"bronze";}
+const rank={bronze:1,silver:2,gold:3};
+function checkChampion(){
+ if(!allDone()) return;
+ const lv=levelFor(S.quiz||0);
+ if(!S.champion){
+  S.champion={date:new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}),level:lv};save();
+  setTimeout(showChamp,1200);
+ } else if(rank[lv]>rank[S.champion.level]){S.champion.level=lv;save();toast("Badge upgraded to "+LEVELS[lv].n+"!");}
+}
+function badgeSVG(cls){
+ const c=S.champion||{level:"gold",date:""}, L=LEVELS[c.level];
+ const name=esc((S.name||"AI Ethics Inspector").slice(0,34));
+ const icons=[["✊",210],["⚖️",270],["🔒",330],["🤝",390]];
+ return `<svg class="medal ${cls||''}" viewBox="0 0 600 680" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+ <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${L.c1}"/><stop offset="1" stop-color="${L.c2}"/></linearGradient>
+ <path id="arcT" d="M110,300 A190,190 0 0 1 490,300"/><path id="arcB" d="M95,300 A205,205 0 0 0 505,300"/></defs>
+ <path d="M200 470 L150 670 L215 630 L255 680 L290 500Z" fill="#e4572e"/><path d="M400 470 L450 670 L385 630 L345 680 L310 500Z" fill="#6a4cc2"/>
+ <circle cx="300" cy="300" r="262" fill="url(#g)" stroke="${L.ring}" stroke-width="8"/>
+ <circle cx="300" cy="300" r="236" fill="none" stroke="${L.ring}" stroke-width="2" stroke-dasharray="4 8"/>
+ <circle cx="300" cy="300" r="168" fill="#1f2a44"/>
+ <circle cx="300" cy="300" r="158" fill="none" stroke="${L.c1}" stroke-width="3"/>
+ 
+ <text font-size="25" font-weight="800" fill="${L.ring}" letter-spacing="4"><textPath href="#arcT" startOffset="50%" text-anchor="middle">AI ETHICS CHAMPION</textPath></text>
+ <text font-size="17" font-weight="700" fill="${L.ring}" letter-spacing="2"><textPath href="#arcB" startOffset="50%" text-anchor="middle">SIS JUWAIZA · GRADE 9 AI (417)</textPath></text>
+ <text x="300" y="196" font-size="40" text-anchor="middle">🏆</text>
+ ${icons.map(([e,x])=>`<circle cx="${x}" cy="238" r="22" fill="#fff"/><text x="${x}" y="247" font-size="24" text-anchor="middle">${e}</text>`).join("")}
+ <text x="300" y="288" font-size="15" font-weight="700" fill="${L.c1}" text-anchor="middle" letter-spacing="5">${L.n} LEVEL</text>
+ <text x="300" y="322" font-size="${name.length>22?20:26}" font-weight="800" fill="#fff" text-anchor="middle">${name}</text>
+ <line x1="200" y1="338" x2="400" y2="338" stroke="${L.c1}" stroke-width="2"/>
+ <text x="300" y="362" font-size="14" fill="#cfd6e6" text-anchor="middle">Completed all 6 missions</text>
+ <text x="300" y="383" font-size="14" fill="#cfd6e6" text-anchor="middle">Quiz ${S.quiz??"-"}/10 · ${S.xp} XP</text>
+ <text x="300" y="406" font-size="13" fill="${L.c1}" text-anchor="middle">${esc(c.date)}</text>
+ </svg>`;
+}
+function confetti(){const cols=["#e4572e","#d98e04","#127e8a","#6a4cc2","#ffd166","#1e8a4c"];
+ for(let i=0;i<90;i++){const d=document.createElement("div");d.className="confetti";
+  d.style.left=Math.random()*100+"vw";d.style.background=cols[i%cols.length];d.style.animationDuration=(2+Math.random()*2.5)+"s";d.style.animationDelay=Math.random()*.6+"s";
+  document.body.appendChild(d);setTimeout(()=>d.remove(),5500);}}
+function showChamp(){
+ $("#champName").value=S.name||"";
+ $("#modalMedal").innerHTML=badgeSVG("pop");
+ $("#champModal").classList.add("show");confetti();
+}
+function closeChamp(){$("#champModal").classList.remove("show");}
+function renderChampArea(){
+ const left=SECTIONS.filter(s=>s.badge&&!S.done[s.id]).length;
+ if(S.champion){
+  $("#champArea").innerHTML=`<div class="champ"><div>${badgeSVG()}</div><div><span class="pill" style="background:var(--ok-soft);color:var(--ok)">Class badge earned</span>
+   <h2 style="margin-top:10px">AI Ethics Champion: ${LEVELS[S.champion.level].n}</h2>
+   <p style="color:var(--muted)">Awarded on ${esc(S.champion.date)} for completing every mission of the AI Ethics class. Check that your name is correct below, then download your badge.</p>
+   <p style="font-size:14px;color:var(--muted)">🥇 Gold: quiz 9–10 · 🥈 Silver: quiz 7–8 · 🥉 Bronze: quiz below 7. Retake the quiz to upgrade your level.</p>
+   <div class="row"><button class="btn dlBtn" onclick="downloadBadge()">⬇️ Download badge picture</button><button class="btn ghost" onclick="showChamp()">🎉 Celebrate again</button></div>
+   <p class="noDl" style="font-size:13px;color:var(--muted)">Tip: take a screenshot to keep your badge.</p></div></div>`;
+ } else {
+  $("#champArea").innerHTML=`<div class="champ locked"><div>${badgeSVG()}</div><div><span class="pill" style="background:#eee;color:var(--muted)">🔒 Locked</span>
+   <h2 style="margin-top:10px">AI Ethics Champion badge</h2>
+   <p style="color:var(--muted)">Finish all 6 missions to unlock your class badge with your name on it. You have <b>${left}</b> mission${left==1?'':'s'} left.</p>
+   <p style="font-size:14px;color:var(--muted)">Your quiz score sets your level: 🥇 Gold 9–10 · 🥈 Silver 7–8 · 🥉 Bronze below 7.</p></div></div>`;
+ }
+ applyDl();
+}
+let DL=null;
+const OUTSIDE=!(window.claude&&window.claude.use);
+function applyDl(){document.querySelectorAll(".dlBtn").forEach(b=>b.style.display="");document.querySelectorAll(".noDl").forEach(p=>p.style.display="none");}
+if(window.claude&&claude.use){claude.use("downloads").then(d=>{DL=d;}).catch(()=>{});}
+function badgeFile(){return "AI-Ethics-Champion-"+((S.name||"badge").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"-")||"badge")+".png";}
+function makeBadgePNG(){return new Promise((res,rej)=>{
+ const svg=badgeSVG().replace(/class="medal[^"]*"/,'width="1200" height="1360"');
+ const img=new Image();
+ img.onload=()=>{const cv=document.createElement("canvas");cv.width=1200;cv.height=1360;const x=cv.getContext("2d");
+  x.fillStyle="#fff";x.fillRect(0,0,1200,1360);x.drawImage(img,0,0,1200,1360);
+  cv.toBlob(b=>b?res({blob:b,url:cv.toDataURL("image/png")}):rej(),"image/png");};
+ img.onerror=rej;
+ img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);});}
+async function downloadBadge(){
+ let png; try{png=await makeBadgePNG();}catch(e){toast("Couldn't create the picture. Please take a screenshot.");return;}
+ showPic(png.url);
+ const fn=badgeFile();
+ if(DL){try{await DL.save({filename:fn,data:png.blob});toast("Badge picture saved ✓");}
+  catch(e){if(e&&e.code=="rate_limited")toast("Please wait a moment and try again");}
+  return;}
+ if(OUTSIDE){try{const u=URL.createObjectURL(png.blob),a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);toast("Badge picture saved ✓");}catch(e){}}
+}
+function showPic(url){
+ let m=document.getElementById("picModal");
+ if(!m){m=document.createElement("div");m.id="picModal";m.className="modal";
+  m.innerHTML=`<div class="mbox"><button class="x" onclick="this.closest('.modal').classList.remove('show')" aria-label="Close">✕</button>
+  <h2>Your badge picture 🏅</h2>
+  <p style="color:var(--muted);margin:4px 0 10px">If it didn't download automatically, save it from here:<br><b>Computer:</b> right-click the picture and choose <b>Save image as…</b><br><b>Phone or tablet:</b> press and hold the picture, then tap <b>Save image</b>.</p>
+  <img id="picImg" alt="AI Ethics Champion badge" style="width:100%;max-width:360px;border-radius:12px;border:1px solid var(--line)">
+  <div class="row" style="justify-content:center;margin-top:12px"><button class="btn" onclick="downloadBadge()">⬇️ Download again</button></div></div>`;
+  document.body.appendChild(m);}
+ m.querySelector("#picImg").src=url; m.classList.add("show");
+}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function toast(msg){const t=document.createElement("div");t.textContent=msg;
+ Object.assign(t.style,{position:"fixed",bottom:"24px",left:"50%",transform:"translateX(-50%)",background:"#1f2a44",color:"#ffd166",padding:"14px 22px",borderRadius:"14px",fontWeight:"700",zIndex:99,boxShadow:"0 10px 30px rgba(0,0,0,.25)"});
+ document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
+
+function renderTop(){
+ $("#xp").textContent=S.xp;
+ $("#badgeCount").textContent=Object.keys(S.done).length;
+ const cur=location.hash.slice(1)||"home";
+ $("#nav").innerHTML=SECTIONS.map(s=>`<a href="#${s.id}" class="${s.id==cur?'on':''}">${s.label}${S.done[s.id]?' <span class="tick">✓</span>':''}</a>`).join("");
+ $("#path").innerHTML=SECTIONS.filter(s=>s.title).map((s,i)=>`<a class="step ${S.done[s.id]?'done':''}" href="#${s.id}"><div class="n">${S.done[s.id]?'✓':i+1}</div><div><h4>${s.title}</h4><p>${s.desc}</p></div></a>`).join("")
+  +`<a class="step ${S.champion?'done':''}" href="#report" style="border:2px dashed ${S.champion?'var(--ok)':'#c9971c'}"><div class="n" style="background:${S.champion?'var(--ok)':'#c9971c'}">🏆</div><div><h4>Class badge: AI Ethics Champion</h4><p>${S.champion?LEVELS[S.champion.level].n+' level earned! Open it to download.':'Unlocks when all 6 missions are complete'}</p></div></a>`;
+}
+
+function route(){
+ const id=location.hash.slice(1)||"home";
+ document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id==id));
+ if(!document.getElementById(id)) document.getElementById("home").classList.add("on");
+ if(id=="report") renderReport();
+ renderTop(); window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+
+/* ---------- 1 sort ---------- */
+function renderSort(){
+ const n=Object.keys(S.sort).length;
+ const next=SORT.findIndex((_,i)=>S.sort[i]===undefined);
+ const chips=w=>SORT.map((s,i)=>S.sort[i]===w?`<span class="chip ${s.a==w?'ok':'bad'}">${esc(s.t)}</span>`:"").join("");
+ let h="";
+ if(next>-1){
+  h+=`<div class="stmt">"${esc(SORT[next].t)}"</div>
+   <div class="row" style="justify-content:center"><button class="btn" onclick="sortPick(${next},'e')" style="background:#3b5bab">← Ethics (external rule)</button><button class="btn" onclick="sortPick(${next},'m')" style="background:#c47a12">Morals (personal belief) →</button></div>
+   <p style="text-align:center;font-size:13px;color:var(--muted)">${n+1} of ${SORT.length}</p>`;
+ } else {
+  const score=SORT.filter((s,i)=>S.sort[i]==s.a).length;
+  h+=`<div class="fb ok show"><b>${score}/${SORT.length} correct!</b> Ethics are rules we follow because a society or profession expects them. Morals are rules we choose for ourselves. <button class="btn ghost" style="padding:4px 10px;font-size:13px;margin-left:6px" onclick="S.sort={};save();renderSort()">Try again</button></div>`;
+ }
+ h+=`<div id="sortFb" class="fb"></div><div class="sortwrap"><div class="bin e"><h4>🏛️ Ethics</h4>${chips("e")}</div><div class="bin m"><h4>💭 Morals</h4>${chips("m")}</div></div>`;
+ $("#sortArea").innerHTML=h;
+}
+function sortPick(i,w){
+ S.sort[i]=w; const ok=SORT[i].a==w; if(ok) addXP(5); save(); renderSort();
+ const fb=$("#sortFb"); fb.className="fb show "+(ok?"ok":"bad");
+ fb.innerHTML=(ok?"✅ Correct! ":"❌ Not quite. ")+esc(SORT[i].why);
+ if(Object.keys(S.sort).length==SORT.length) complete("learn");
+}
+
+/* ---------- 2 principles ---------- */
+let curP="hr";
+function renderP(){
+ $("#pcards").innerHTML=Object.entries(P).map(([k,p])=>{
+  const done=p.ex.every((_,j)=>S.pex[k+j]!==undefined);
+  return `<div class="pcard ${p.cls} ${k==curP?'sel':''}" onclick="curP='${k}';renderP()"><div class="ic">${p.ic}</div><h3>${p.name}${done?' ✓':''}</h3><p>${p.def.split(".")[0]}.</p></div>`}).join("");
+ const p=P[curP];
+ $("#pdetail").innerHTML=`<div class="row" style="justify-content:space-between"><h3 style="color:${p.color};margin:0">${p.ic} ${p.name}</h3><span class="pill" style="background:${p.soft};color:${p.color}">Inspector checklist</span></div>
+  <p>${p.def}</p>
+  ${p.qs.map(q=>`<div class="checkq"><span>🔍</span><span class="q">${q}</span></div>`).join("")}
+  <h4 style="margin-top:20px">Pass or fail?</h4>
+  ${p.ex.map((e,j)=>{const a=S.pex[curP+j];const ans=a!==undefined;
+   return `<div class="ex" style="background:${p.soft}"><div>${e.t}</div>
+   <div class="row" style="margin-top:8px">${ans?`<b style="color:${a==e.pass?'var(--ok)':'var(--bad)'}">${a==e.pass?'✅ Correct':'❌ Not quite'}. It ${e.pass?'PASSES':'FAILS'}:</b> <span>${e.why}</span>`:
+   `<button class="btn" style="background:var(--ok)" onclick="pAns('${curP}',${j},true)">✅ Passes</button><button class="btn" style="background:var(--bad)" onclick="pAns('${curP}',${j},false)">❌ Fails</button>`}</div></div>`}).join("")}`;
+}
+function pAns(k,j,v){S.pex[k+j]=v; if(v==P[k].ex[j].pass) addXP(5); save();
+ const all=Object.keys(P).every(k=>P[k].ex.every((_,j)=>S.pex[k+j]!==undefined));
+ if(all) complete("principles");
+ else if(P[k].ex.every((_,j)=>S.pex[k+j]!==undefined)){const ks=Object.keys(P);const nx=ks.find(x=>!P[x].ex.every((_,j)=>S.pex[x+j]!==undefined));if(nx){setTimeout(()=>{curP=nx;renderP();},1400);}}
+ renderP();}
+
+/* ---------- 3 bias sim ---------- */
+const SIMQ=[{t:"I changed the AI's code.",ok:false},{t:"I changed the training data so both groups were equally represented.",ok:true},{t:"I made the applicants more skilled.",ok:false}];
+let simPick=null;
+function renderSim(){
+ const v=+$("#biasSlider").value, a=v, b=100-v;
+ $("#barA").style.width=a+"%";$("#barA").textContent=a>8?a+"%":"";
+ $("#barB").style.width=b+"%";$("#barB").textContent=b>8?b+"%":"";
+ $("#pa").textContent=a+"%";$("#pb").textContent=b+"%";
+ const selA=Math.round(10*a/100), selB=10-selA;
+ let h="",ca=0,cb=0;
+ for(let i=0;i<20;i++){const g=i%2?"B":"A";let pick=false;
+  if(g=="A"){pick=ca<selA;ca++;}else{pick=cb<selB;cb++;}
+  h+=`<div class="person ${g} ${pick?'pick':'drop'}">${g=="A"?"🧑🏽":"👩🏽"}</div>`;}
+ $("#people").innerHTML=h;
+ $("#selA").textContent=selA;$("#selB").textContent=selB;
+ const fair=100-Math.abs(selA-selB)*10;
+ const fb=$("#fairBar");fb.style.width=fair+"%";fb.style.background=fair>=80?"var(--ok)":fair>=50?"var(--bias)":"var(--bad)";
+ const m=$("#simMsg");
+ if(Math.abs(a-50)<=10){m.className="fb ok show";m.innerHTML="✅ <b>Balanced data → fair AI.</b> Both groups appear about equally in past hires, so the AI picks about equally from equally skilled applicants.";}
+ else{const fav=a>b?"Group A":"Group B";m.className="fb bad show";m.innerHTML=`⚠️ <b>Biased data → biased AI.</b> The AI has learned that "good employees" usually look like ${fav}. Nobody programmed it to be unfair. It copied the pattern in its data.`;}
+ if(fair>=80 && !S.sim){S.sim=true;save();}
+ renderSimQ();
+}
+function renderSimQ(){
+ $("#simOpts").innerHTML=SIMQ.map((o,i)=>`<button class="opt ${simPick===i?(o.ok?'right':'wrong'):''}" onclick="simAns(${i})">${o.t}</button>`).join("");
+}
+function simAns(i){
+ if(!S.sim){const f=$("#simFb");f.className="fb info show";f.innerHTML="First move the slider until the fairness bar turns green.";return;}
+ simPick=i;renderSimQ();const f=$("#simFb");
+ if(SIMQ[i].ok){f.className="fb ok show";f.innerHTML="✅ Exactly. The AI's code never changed. Only the <b>data</b> did. That's why the Bias checklist asks: <i>Does your data equally represent all the groups of people it is about?</i>";addXP(10);complete("bias-lab");}
+ else{f.className="fb bad show";f.innerHTML="❌ Look again. You only moved the slider for the training data. The code and the applicants' skills stayed the same.";}
+}
+$("#biasSlider").addEventListener("input",renderSim);
+
+/* ---------- 4 scenarios ---------- */
+let curS=0;
+function scState(id){return S.scen[id]||(S.scen[id]={step:1,picks:[],q:null,fix:null,note:""});}
+function renderScenList(){
+ $("#scenList").innerHTML=SCEN.map((s,i)=>`<button class="${i==curS?'on':''} ${scState(s.id).step>4?'done':''}" onclick="curS=${i};renderScen()">${s.emoji} Case ${i+1}</button>`).join("");
+}
+function renderScen(){
+ renderScenList();
+ const s=SCEN[curS], st=scState(s.id);
+ let h=`<div class="story"><div class="emoji">${s.emoji}</div><div><span class="pill" style="background:#eef1f8;color:var(--navy)">📍 ${s.place}</span><h3 style="margin-top:8px">${s.title}</h3><p>${s.text}</p></div></div>`;
+ // step1
+ h+=`<div class="stage"><h4><span class="n">1</span>Identify: which principle(s) are broken?</h4><p style="margin-top:0;font-size:14px;color:var(--muted)">Select every principle that applies, then check.</p>
+  <div class="ptoggles">${Object.entries(P).map(([k,p])=>{
+   let cls=st.picks.includes(k)?"sel "+p.tog:"";
+   return `<button class="ptog ${cls}" ${st.step>1?'disabled':''} onclick="togP('${k}')">${p.ic} ${p.name}</button>`}).join("")}</div>`;
+ if(st.step==1) h+=`<div class="row" style="margin-top:12px"><button class="btn" onclick="checkP()" ${st.picks.length?'':'disabled'}>Check</button></div><div class="fb" id="s1fb"></div>`;
+ else{const right=s.ans.every(a=>st.picks.includes(a))&&st.picks.every(p=>s.ans.includes(p));
+  h+=`<div class="fb show ${right?'ok':'info'}">${right?'✅ Spot on!':'📌 Inspector answer:'} This case breaks <b>${s.ans.map(a=>P[a].ic+" "+P[a].name).join("</b> and <b>")}</b>.</div>`;}
+ h+=`</div>`;
+ // step2
+ if(st.step>=2){h+=`<div class="stage"><h4><span class="n">2</span>Analyse: ${s.qText}</h4><div class="opts">${s.q.map((o,i)=>{
+   let c=st.q===null?"":(o.ok?"right":(st.q==i?"wrong":""));
+   return `<button class="opt ${c}" ${st.q!==null?'disabled':''} onclick="scQ(${i})">🔍 ${o.t}</button>`}).join("")}</div></div>`;}
+ // step3
+ if(st.step>=3){h+=`<div class="stage"><h4><span class="n">3</span>Fix: what's the best way to make this AI ethical?</h4><div class="opts">${s.fix.map((o,i)=>{
+   let c=st.fix===null?"":(o.ok?"right":(st.fix==i?"wrong":""));
+   return `<button class="opt ${c}" ${st.fix!==null?'disabled':''} onclick="scF(${i})">🛠️ ${o.t}${st.fix!==null&&(o.ok||st.fix==i)?`<div style="font-size:14px;margin-top:6px;color:var(--muted)">${o.why}</div>`:''}</button>`}).join("")}</div></div>`;}
+ // step4
+ if(st.step>=4){h+=`<div class="stage"><h4><span class="n">4</span>Interpret: connect it to real life</h4><p style="margin-top:0"><b>💬 ${s.think}</b></p>
+   <textarea id="note" placeholder="Write 2–3 sentences in your own words…">${esc(st.note)}</textarea>
+   <div class="row" style="margin-top:10px"><button class="btn" onclick="scN()">${st.step>4?'Update note':'Submit inspection'}</button>
+   ${st.step>4&&curS<SCEN.length-1?`<button class="btn ghost" onclick="curS++;renderScen()">Next case →</button>`:''}</div><div class="fb" id="s4fb"></div></div>`;}
+ $("#scenCard").innerHTML=h;
+}
+function togP(k){const st=scState(SCEN[curS].id);if(st.step>1)return;const i=st.picks.indexOf(k);i>-1?st.picks.splice(i,1):st.picks.push(k);save();renderScen();}
+function checkP(){const s=SCEN[curS],st=scState(s.id);
+ const hit=st.picks.filter(p=>s.ans.includes(p)).length, extra=st.picks.filter(p=>!s.ans.includes(p)).length;
+ addXP(Math.max(0,hit*5-extra*2)); st.step=2; save(); renderScen();}
+function scQ(i){const st=scState(SCEN[curS].id);st.q=i;if(SCEN[curS].q[i].ok)addXP(5);st.step=3;save();renderScen();}
+function scF(i){const st=scState(SCEN[curS].id);st.fix=i;if(SCEN[curS].fix[i].ok)addXP(5);st.step=4;save();renderScen();}
+function scN(){const st=scState(SCEN[curS].id);const v=$("#note").value.trim();
+ const f=$("#s4fb");
+ if(v.split(/\s+/).filter(Boolean).length<8){f.className="fb bad show";f.textContent="Write a bit more: at least one full sentence with your reason.";return;}
+ const first=st.step==4; st.note=v; st.step=5; if(first)addXP(10); save(); renderScen();
+ const f2=$("#s4fb");f2.className="fb ok show";f2.innerHTML="📝 Inspection saved to your report.";
+ if(SCEN.every(s=>scState(s.id).step>4)) complete("scenarios");
+ else if(SCEN.filter(s=>scState(s.id).step>4).length>=4 && !S.done.scenarios){f2.innerHTML+=" Complete all 8 cases to earn the Ethics Inspector badge.";}
+}
+
+/* ---------- 5 my AI audit ---------- */
+const AUD=[
+ {k:"hr",q:"Could it take away anyone's freedom or rights?",good:"No"},
+ {k:"hr",q:"Could it take away people's jobs without a plan to help them?",good:"No"},
+ {k:"bias",q:"Will the training data include all the groups of people who will use it (ages, languages, backgrounds)?",good:"Yes"},
+ {k:"bias",q:"Could it learn to treat one group better than another?",good:"No"},
+ {k:"priv",q:"Does it collect personal data (faces, voices, location, marks)?",good:"No"},
+ {k:"priv",q:"If it collects data, will users be asked first, and will the data be kept safe?",good:"Yes"},
+ {k:"inc",q:"Could some people be left out (no smartphone, different language, disability)?",good:"No"},
+ {k:"inc",q:"Is it easy for everyone to use, rich or poor?",good:"Yes"}
+];
+const TIPS={hr:"Keep a human in charge of big decisions, and plan how to retrain anyone whose job changes.",bias:"Collect balanced training data from every group, and test results group by group.",priv:"Collect only the data you need, ask permission, store it securely and delete it when you're done.",inc:"Support several languages, voice and text, and low-cost devices, and test with real users from different backgrounds."};
+function renderAudit(){
+ $("#aiName").value=S.aiName||"";
+ $("#auditQs").innerHTML=AUD.map((a,i)=>{const v=S.audit[i];
+  const cls=x=>v===x?("sel "+(x==a.good?"good":"risk")):"";
+  return `<div class="audit-q"><div><span class="pill" style="background:${P[a.k].soft};color:${P[a.k].color}">${P[a.k].name}</span><div style="margin-top:4px">${a.q}</div></div>
+  <div class="yn"><button class="${cls('Yes')}" onclick="aud(${i},'Yes')">Yes</button><button class="${cls('No')}" onclick="aud(${i},'No')">No</button></div></div>`}).join("");
+ const n=Object.keys(S.audit).length;
+ if(!n){$("#auditOut").innerHTML=`<p style="color:var(--muted)">Answer the questions to see your AI's ethics score.</p>`;return;}
+ const good=AUD.filter((a,i)=>S.audit[i]==a.good).length, score=Math.round(good/AUD.length*100);
+ const risks=[...new Set(AUD.filter((a,i)=>S.audit[i]!==undefined&&S.audit[i]!=a.good).map(a=>a.k))];
+ let h=`<p style="margin:0;color:var(--muted)">${S.aiName?esc(S.aiName):"Your AI"}</p><div class="meter" style="font-size:40px">${score}%</div><div class="gauge"><div style="width:${score}%;background:${score>=75?'var(--ok)':score>=50?'var(--bias)':'var(--bad)'}"></div></div>
+  <p><b>${score>=75?"🟢 Looking responsible!":score>=50?"🟡 Needs some work":"🔴 High ethical risk"}</b> · ${n}/${AUD.length} answered</p>`;
+ h+=Object.entries(P).map(([k,p])=>{const r=risks.includes(k);return `<div class="ex" style="background:${r?'var(--bad-soft)':p.soft}"><b>${p.ic} ${p.name}: ${r?'⚠️ Risk found':'✅ OK so far'}</b>${r?`<div style="font-size:14px;margin-top:4px">Fix idea: ${TIPS[k]}</div>`:''}</div>`}).join("");
+ $("#auditOut").innerHTML=h;
+ if(n==AUD.length && S.aiName.trim().length>5) complete("my-ai");
+ else if(n==AUD.length && !S.aiName.trim()) $("#auditOut").innerHTML+=`<div class="fb bad show">Describe your AI idea at the top to finish this mission.</div>`;
+}
+function aud(i,v){S.audit[i]=v;S.aiName=$("#aiName").value;save();renderAudit();}
+$("#aiName").addEventListener("change",e=>{S.aiName=e.target.value;save();renderAudit();});
+document.querySelectorAll("[data-idea]").forEach(b=>b.onclick=()=>{S.aiName=b.dataset.idea;save();renderAudit();});
+
+/* ---------- 6 quiz ---------- */
+let qi=0,qans=[];
+function renderQuiz(){
+ if(S.quiz!==null && qi>=QUIZ.length || (S.quiz!==null && !qans.length)){
+  const sc=S.quiz;
+  $("#quizCard").innerHTML=`<div style="text-align:center"><div style="font-size:56px">${sc>=8?'🏆':sc>=5?'👍':'📚'}</div><h2>${sc}/10</h2><p>${sc>=8?'Excellent! You think like an AI Ethics Inspector.':sc>=5?'Good work. Review the missions where you lost points.':'Go back through Missions 1–4 and try again.'}</p>
+  <div class="row" style="justify-content:center"><button class="btn ghost" onclick="S.quiz=null;qi=0;qans=[];save();renderQuiz()">Retake quiz</button><a class="btn" href="#report" style="text-decoration:none">See my report →</a></div></div>`;return;}
+ const q=QUIZ[qi], ans=qans[qi];
+ $("#quizCard").innerHTML=`<div class="qprog"><div style="width:${qi/QUIZ.length*100}%"></div></div>
+  <p style="color:var(--muted);margin:0 0 4px">Question ${qi+1} of ${QUIZ.length}</p><div class="big">${q.q}</div>
+  <div class="opts">${q.o.map((o,i)=>{let c=ans===undefined?"":(i==q.a?"right":(i==ans?"wrong":""));
+   return `<button class="opt ${c}" ${ans!==undefined?'disabled':''} onclick="qAns(${i})">${String.fromCharCode(65+i)}. ${o}</button>`}).join("")}</div>
+  ${ans!==undefined?`<div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn" onclick="qi++;if(qi>=QUIZ.length){finishQuiz()}else renderQuiz()">${qi==QUIZ.length-1?'Finish':'Next →'}</button></div>`:''}`;
+}
+function qAns(i){qans[qi]=i;if(i==QUIZ[qi].a)addXP(5);renderQuiz();}
+function finishQuiz(){S.quiz=QUIZ.filter((q,i)=>qans[i]==q.a).length;save();complete("quiz");renderQuiz();}
+
+/* ---------- report ---------- */
+function renderReport(){
+ $("#stuName").value=S.name||"";
+ renderChampArea();
+ $("#badges").innerHTML=SECTIONS.filter(s=>s.badge).map(s=>`<span class="badge ${S.done[s.id]?'':'locked'}">${s.badge}</span>`).join("");
+ let t=`AI ETHICS LAB – LEARNING REPORT\nStudent: ${S.name||"(enter your name)"}\nXP: ${S.xp} · Badges: ${Object.keys(S.done).length}/6\nClass badge: ${S.champion?"AI Ethics Champion – "+LEVELS[S.champion.level].n+" (awarded "+S.champion.date+")":"not yet earned"}\n`;
+ const sortSc=SORT.filter((s,i)=>S.sort[i]==s.a).length;
+ t+=`\n1. Ethics vs Morals sort: ${Object.keys(S.sort).length?sortSc+"/8":"not done"}`;
+ t+=`\n2. Principles checklist: ${S.done.principles?"completed":"not done"}`;
+ t+=`\n3. Bias simulator: ${S.done["bias-lab"]?"completed – biased data creates biased AI":"not done"}`;
+ t+=`\n4. Real-case inspections:`;
+ SCEN.forEach((s,i)=>{const st=S.scen[s.id];if(st&&st.step>4){
+   const fixOk=s.fix[st.fix]&&s.fix[st.fix].ok;
+   t+=`\n   Case ${i+1} – ${s.title}\n     Principles: ${s.ans.map(a=>P[a].name).join(", ")} | Best fix chosen: ${fixOk?"Yes":"No"}\n     My interpretation: ${st.note}`;}});
+ if(!SCEN.some(s=>S.scen[s.id]&&S.scen[s.id].step>4)) t+=" none yet";
+ if(Object.keys(S.audit).length){const good=AUD.filter((a,i)=>S.audit[i]==a.good).length;
+  t+=`\n5. My AI idea: ${S.aiName||"-"}\n   Ethics score: ${Math.round(good/AUD.length*100)}%`;} else t+=`\n5. My AI audit: not done`;
+ t+=`\n6. Final quiz: ${S.quiz!==null?S.quiz+"/10":"not done"}`;
+ $("#repText").textContent=t;
+}
+$("#stuName").addEventListener("input",e=>{S.name=e.target.value;save();renderReport();});
+$("#copyRep").onclick=async()=>{try{await navigator.clipboard.writeText($("#repText").textContent);toast("Report copied ✓");}catch(e){
+ const r=document.createRange();r.selectNodeContents($("#repText"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);toast("Text selected: press Ctrl+C to copy");}};
+let resetArm=false;
+$("#resetAll").onclick=e=>{if(!resetArm){resetArm=true;e.target.textContent="Click again to erase everything";setTimeout(()=>{resetArm=false;e.target.textContent="Start again"},3000);return;}
+ S={xp:0,done:{},sort:{},pex:{},sim:false,scen:{},audit:{},aiName:"",quiz:null,name:""};save();qi=0;qans=[];simPick=null;
+ renderSort();renderP();renderSim();renderScen();renderAudit();renderQuiz();renderReport();renderTop();e.target.textContent="Start again";resetArm=false;};
+
+/* init */
+$("#champName").addEventListener("input",e=>{S.name=e.target.value;save();$("#modalMedal").innerHTML=badgeSVG();});
+renderSort();renderP();renderSim();renderScen();renderAudit();renderQuiz();route();
+</script>
+</body>
+</html>
